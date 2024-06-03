@@ -42,7 +42,7 @@ body {
 </head>
 <body>
     <div class="min-h-screen bg-light">
-        @include('layouts.navigation')
+
 
         <!-- Page Heading -->
         @if (isset($header))
@@ -55,6 +55,7 @@ body {
 
         <!-- Page Content -->
         <main class="container py-4">
+            @include('layouts.navigation')
              @if (session('success'))
                  <div   div class="alert alert-warning alert-dismissible fade show" role="alert" role="alert">
             {{ session('success') }}

@@ -21,9 +21,9 @@
 <body class="font-sans antialiased">
     @include('partials.navbar') <!-- Include the navbar -->
 
-    <section class="min-h-screen bg-gradient-to-r from-orange-400 to-white dark:text-gray-800">
+    <div class="min-h-screen bg-gray-100 dark:bg-gray-900">
         @yield('content')
-    </section>
+    </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.0/jquery.min.js" integrity="sha256-xNzN2a4ltkB44Mc/Jz3pT4iU1cmeR0FkXs4pru/JxaQ=" crossorigin="anonymous"></script>
     <script>
