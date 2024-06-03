@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 //import Model "Post
 use App\Models\Testimonial;
+use App\Models\ProjectClient;
 use Illuminate\Http\Request;
 //return type View
 use Illuminate\View\View;
@@ -23,16 +24,18 @@ class TestimonialController extends Controller
     {
         //get posts
         $ourTestimoni = Testimonial::latest()->paginate(5);
-
+        $projectClients = ProjectClient::all(); // Mengambil semua data project clients
         //render view with posts
-        return view('our-testimoni.index', compact('ourTestimoni'));
+        return view('our-testimoni.index', compact('ourTestimoni','projectClients'));
     }
 
 
 
     public function create(): View
     {
-        return view('our-testimoni.create');
+        $projectClients = ProjectClient::all(); // Mengambil semua data project clients
+        return view('our-testimoni.create', compact('projectClients'));
+
     }
 
     /**
@@ -42,100 +45,81 @@ class TestimonialController extends Controller
      * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
-    {
-        // Validasi form
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'avatar' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file Thumbnail
-            'logo' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file ICON
-        ]);
+{
+    // Validasi form
+    $request->validate([
+        'author' => 'required|string|max:255',
+        'content' => 'required|string|max:255',
+        'thumbnail' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file Avatar
 
-        $path_thumb = null;
-        $path_icon = null;
+        'project_client_id' => 'required|exists:project_clients,id', // Validasi untuk project_client_id
+    ]);
 
-        // Upload thumbnail jika ada file yang diunggah
-        if ($request->hasFile('avatar')) {
-            $image_thumb = $request->file('avatar');
-            $path_thumb = $image_thumb->storeAs('public/img', $image_thumb->hashName());
-        }
+    $path_thumb = null;
+    $path_icon = null;
 
-        // Upload icon jika ada file yang diunggah
-        if ($request->hasFile('logo')) {
-            $image_icon = $request->file('logo');
-            $path_icon = $image_icon->storeAs('public/icon', $image_icon->hashName());
-        }
-
-        // Buat Testimonial
-        Testimonial::create([
-            'name' => $request->name,
-            'description' => $request->description,
-            'avatar' => $path_thumb,
-            'logo' => $path_icon,
-        ]);
-
-        // Redirect ke index
-        return redirect()->route('our-testimonis.index')->with(['success' => 'Data Berhasil Disimpan!']);
+    // Upload avatar jika ada file yang diunggah
+    if ($request->hasFile('thumbnail')) {
+        $image_thumb = $request->file('thumbnail');
+        $path_thumb = $image_thumb->storeAs('public/img', $image_thumb->hashName());
     }
+
+
+    // Buat Testimonial
+    Testimonial::create([
+        'author' => $request->author,
+        'content' => $request->content,
+        'thumbnail' => $path_thumb,
+
+        'project_client_id' => $request->project_client_id, // Menyimpan project_client_id
+    ]);
+
+    // Redirect ke index
+    return redirect()->route('our-testimoni.index')->with(['success' => 'Data Berhasil Disimpan!']);
+}
 
 
     public function edit(string $id)
     {
         //get post by ID
         $ourTestimoni = Testimonial::findOrFail($id);
-
+        $projectClients = ProjectClient::where('company_about_id', $id)->get();
         //render view with post
-        return view('our-testimoni.edit', compact('Testimonial'));
+        return view('our-testimoni.edit', compact('Testimonial','projectClients'));
     }
     public function update(Request $request, $id): RedirectResponse
 {
     // Validasi form
     $request->validate([
-        'name' => 'required|string|max:255',
-        'description' => 'required|string|max:255',
-        'avatar' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file Thumbnail
-        'logo' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file ICON
+        'author' => 'required|string|max:255',
+        'content' => 'required|string|max:255',
+        'thumbnail' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file Thumbnail
     ]);
 
     // Dapatkan data Testimonial berdasarkan ID
     $ourTestimoni = Testimonial::findOrFail($id);
 
     // Periksa apakah thumbnail diunggah
-    if ($request->hasFile('avatar')) {
+    if ($request->hasFile('thumbnail')) {
         // Unggah gambar baru untuk thumbnail
-        $image_thumb = $request->file('avatar');
+        $image_thumb = $request->file('thumbnail');
         $path_thumb = $image_thumb->storeAs('public/img', $image_thumb->hashName());
 
         // Hapus thumbnail lama
         if ($ourTestimoni->avatar) {
-            Storage::delete('public/img/'.$ourTestimoni->avatar);
+            Storage::delete('public/img/'.$ourTestimoni->thumbnail);
         }
 
         // Perbarui Testimonial dengan gambar thumbnail baru
-        $ourTestimoni->avatar = $path_thumb;
-    }
-
-    // Periksa apakah ikon diunggah
-    if ($request->hasFile('logo')) {
-        // Unggah gambar baru untuk ikon
-        $image_icon = $request->file('logo');
-        $path_icon = $image_icon->storeAs('public/icon', $image_icon->hashName());
-
-        // Hapus ikon lama
-        if ($ourTestimoni->icon) {
-            Storage::delete('public/icon/'.$ourTestimoni->icon);
-        }
-
-        // Perbarui Testimonial dengan gambar ikon baru
-        $ourTestimoni->icon = $path_icon;
+        $ourTestimoni->thumbnail = $path_thumb;
     }
 
     // Perbarui Testimonial dengan data lain
     $ourTestimoni->update([
-        'name' => $request->name,
-        'description' => $request->description,
-        'avatar' => $Testimonial->avatar,
-        'logo' => $Testimonial->logo,
+        'author' => $request->author,
+        'content' => $request->content,
+        'thumbnail' => $Testimonial->thumbnail,
+
     ]);
 
     // Redirect ke index
@@ -144,9 +128,9 @@ class TestimonialController extends Controller
 
     public function destroy($id)
     {
-        $Testimonial = Testimonial::findOrFail($id);
-        $Testimonial->delete();
+        $ourTestimoni = Testimonial::findOrFail($id);
+        $ourTestimoni->delete();
 
-        return redirect()->route('our-testimonis.index')->with('success', 'Hero Section deleted successfully.');
+        return redirect()->route('our-testimoni.index')->with('success', 'Testimonial deleted successfully.');
     }
 }

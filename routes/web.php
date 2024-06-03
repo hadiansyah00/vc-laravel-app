@@ -23,13 +23,12 @@ use App\Http\Controllers\ProjectClientController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [HeroSectionController::class, 'FrontEnd']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
 
 
 Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {

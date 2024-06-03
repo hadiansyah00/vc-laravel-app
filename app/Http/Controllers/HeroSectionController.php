@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 //import Model "Post
 use App\Models\HeroSection;
+use App\Models\CompanyAbout;
+use App\Models\CompanyKeypoint;
 
 use Illuminate\Http\Request;
 
@@ -30,6 +32,15 @@ class HeroSectionController extends Controller
 
         //render view with posts
         return view('hero-sections.index', compact('heroSections'));
+    }
+    public function FrontEnd() //Halaman Frontend nya
+    {
+        //Tampilkan halaman view nya
+        $companyAbout = CompanyAbout::latest()->paginate(5);
+        $frontendHero = HeroSection::latest()->paginate(5);
+        $keypoints = CompanyKeypoint::all();
+        //render view with posts
+        return view('frontend-home', compact('frontendHero','companyAbout','keypoints'));
     }
 
 

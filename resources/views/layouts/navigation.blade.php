@@ -46,7 +46,7 @@
                         </div>
                     </li>
                     <li class="nav-item active">
-                        <a class="nav-link" href="{{ route ('dashboard') }}"> About <span class="sr-only">(current)</span></a>
+                        <a class="nav-link" href="{{ route ('company-about.index') }}"> About <span class="sr-only">(current)</span></a>
                     </li>
                     <li class="nav-item active">
                         <a class="nav-link" href="{{ route ('dashboard') }}"> Apointments <span class="sr-only">(current)</span></a>

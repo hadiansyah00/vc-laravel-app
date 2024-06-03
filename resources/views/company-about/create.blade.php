@@ -11,33 +11,43 @@
                 <div class="col-md-12">
                     <div class="border-0 rounded shadow-sm card">
                         <div class="card-body">
-                            <form action="{{ route('our-teams.store') }}" method="POST" enctype="multipart/form-data">
+                            <form action="{{ route('company-about.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
-                                @method('POST')
                                 <div class="form-group">
                                     <label class="font-weight-bold">Name</label>
-                                    <input type="text" class="form-control" @error('name') is-invalid @enderror name="name" placeholder="Input Name">
+                                    <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required>
                                     @error('name')
-                                        <div class="mt-2 alert alert-danger">
-                                            {{ $message }}
-                                        </div>
+                                        <div class="mt-2 alert alert-danger">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Jabatan</label>
-                                    <input type="text" class="form-control" @error('role') is-invalid @enderror name="role" placeholder="Input Role">
-                                    @error('role')
-                                        <div class="mt-2 alert alert-danger">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
-                                </div>
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Image</label>
-                                    <input type="file" id="image" name="image" class="form-control">
 
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Type</label>
+                                    <input type="text" class="form-control @error('type') is-invalid @enderror" name="type" value="{{ old('type') }}" required>
+                                    @error('type')
+                                        <div class="mt-2 alert alert-danger">{{ $message }}</div>
+                                    @enderror
                                 </div>
-                                <button type="submit" class="mx-auto btn btn-md btn-primary">Simpan Data</button>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Thumbnail</label>
+                                    <input type="file" id="thumbnail" name="thumbnail" class="form-control">
+                                    @error('thumbnail')
+                                        <div class="mt-2 alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Keypoints</label>
+                                    <input type="text" class="form-control @error('keypoints.0') is-invalid @enderror" name="keypoints[]" placeholder="Keypoint 1" required>
+                                    <input type="text" class="form-control mt-2 @error('keypoints.1') is-invalid @enderror" name="keypoints[]" placeholder="Keypoint 2" required>
+                                    <input type="text" class="form-control mt-2 @error('keypoints.2') is-invalid @enderror" name="keypoints[]" placeholder="Keypoint 3" required>
+                                    @error('keypoints.*')
+                                        <div class="mt-2 alert alert-danger">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <button type="submit" class="btn btn-md btn-primary">CREATE</button>
                             </form>
 
                         </div>
@@ -45,8 +55,6 @@
                 </div>
             </div>
         </div>
-
-
     </x-app-layout>
 </body>
 

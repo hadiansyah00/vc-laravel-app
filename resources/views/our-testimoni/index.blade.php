@@ -5,7 +5,7 @@
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
                 {{ __('Company About') }}
             </h2>
-            <a href="{{ route('company-about.create') }}" class="btn btn-primary">
+            <a href="{{ route('our-testimoni.create') }}" class="btn btn-primary">
                 Add New
             </a>
         </div>
@@ -20,24 +20,32 @@
                                 <tr>
                                     <th class="px-4 py-2">No</th>
                                     <th class="px-4 py-2">Thumbnail</th>
-                                    <th class="px-4 py-2">Name</th>
-                                    <th class="px-4 py-2">type</th>
+                                    <th class="px-4 py-2">Author</th>
+                                    <th class="px-4 py-2">Project Client</th>
+                                    <th class="px-4 py-2">Content</th>
                                     <th class="px-4 py-2">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach ($companyAbout as $row)
+                                @foreach ($ourTestimoni as $row)
                                     <tr>
                                         <td class="px-4 py-2">{{ $loop->iteration }}</td>
+
                                         <td class="text-center">
                                             <img src="{{ Storage::url($row->thumbnail) }}" class="rounded" style="width: 150px">
                                         </td>
-                                        <td class="px-4 py-2">{{ $row->name }}</td>
-                                        <td class="px-4 py-2">{{ $row->type }}</td>
+                                        <td class="px-4 py-2">{{ $row->author }}</td>
+                                        <td>
+                                            @php
+                                                $projectClient = $projectClients->firstWhere('id', $row->project_client_id);
+                                            @endphp
+                                            {{ $projectClient ? $projectClient->name : 'No Project Client' }}
+                                        </td>
+                                        <td class="px-4 py-2">{{ $row->content }}</td>
                                         <td class="px-4 py-2">
                                             <div class="flex justify-center gap-2">
-                                                <a href="{{ route('company-about.edit', $row->id) }}" class="btn btn-sm btn-primary">Edit</a>
-                                                <form action="{{ route('company-about.destroy', $row->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
+                                                <a href="{{ route('our-testimoni.edit', $row->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                                <form action="{{ route('our-testimoni.destroy', $row->id) }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this item?');">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="btn btn-sm btn-danger">Delete</button>

@@ -55,6 +55,11 @@ body {
 
         <!-- Page Content -->
         <main class="container py-4">
+             @if (session('success'))
+                 <div   div class="alert alert-warning alert-dismissible fade show" role="alert" role="alert">
+            {{ session('success') }}
+        </div>
+    @endif
             {{ $slot }}
         </main>
     </div>

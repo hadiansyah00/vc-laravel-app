@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 //import Model "Post
 use App\Models\CompanyAbout;
-
+use App\Models\CompanyKeypoint;
 use Illuminate\Http\Request;
 
 //return type View
@@ -46,87 +46,114 @@ class CompanyAboutController extends Controller
      * @return RedirectResponse
      */
     public function store(Request $request): RedirectResponse
-    {
-        // Validasi form
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'thumbnail' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file thumbnail
+        {
+                // Validasi form
+                $request->validate([
+                    'name' => 'required|string|max:255',
+                    'type' => 'required|string|max:255',
+                    'thumbnail' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file thumbnail
+                    'keypoints' => 'nullable|array', // Validasi untuk keypoints
+                    'keypoints.*' => 'nullable|string|max:255', // Validasi untuk setiap keypoint
+                ]);
 
-        ]);
+                $thumbnailName = null;
 
-        $thumbnailName = null;
+                // Upload image jika ada file yang diunggah
+                if ($request->hasFile('thumbnail')) {
+                    $image = $request->file('thumbnail');
+                    $path = $image->storeAs('public/img', $image->hashName());
+                }
 
-        // Upload image jika ada file yang diunggah
-        if ($request->hasFile('thumbnail')) {
-            $image = $request->file('thumbnail');
-            $path = $image->storeAs('public/img', $image->hashName());
-        }
+                // Buat CompanyAbout
+                $companyAbout = CompanyAbout::create([
+                    'thumbnail' => $path ?? null,
+                    'name' => $request->name,
+                    'type' => $request->type,
+                ]);
 
-        // Buat CompanyAbout
-        CompanyAbout::create([
-            'thumbnail' => $path,
-            'name' => $request->name,
-            'type' => $request->type,
-        ]);
+                // Buat CompanyKeypoint jika ada
+                if ($request->has('keypoints')) {
+                    foreach ($request->keypoints as $keypoint) {
+                        CompanyKeypoint::create([
+                            'company_about_id' => $companyAbout->id,
+                            'keypoint' => $keypoint,
+                        ]);
+                    }
+                }
 
-        // Redirect ke index
-        return redirect()->route('company-about.index')->with(['success' => 'Data Berhasil Disimpan!']);
-    }
+    // Redirect ke index
+    return redirect()->route('company-about.index')->with(['success' => 'Data Berhasil Disimpan!']);
+}
+
 
     public function edit(string $id)
     {
         //get post by ID
-        $heroSection = CompanyAbout::findOrFail($id);
+        $companyAbout = CompanyAbout::findOrFail($id);
+        $keypoints = CompanyKeypoint::where('company_about_id', $id)->get();
 
-        //render view with post
-        return view('company-about.edit', compact('heroSection'));
+        return view('company-about.edit', compact('companyAbout','keypoints'));
     }
     public function update(Request $request, $id): RedirectResponse
-    {
-        // Validasi form
-        $this->validate($request, [
-            'name' => 'required|string|max:255',
-            'type' => 'required|string|max:255',
-            'thumbnail' => 'nullable|image|mimes:png|max:2048', // validasi untuk file thumbnail
-        ]);
+        {
+            // Validasi form
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'type' => 'required|string|max:255',
+                'thumbnail' => 'nullable|image|mimes:png|max:2048', // Validasi untuk file thumbnail
+                'keypoints' => 'nullable|array', // Validasi untuk keypoints
+                'keypoints.*' => 'nullable|string|max:255', // Validasi untuk setiap keypoint
+            ]);
 
-        // Dapatkan data CompanyAbout berdasarkan ID
-        $companyAboout = CompanyAbout::findOrFail($id);
+            // Dapatkan data CompanyAbout berdasarkan ID
+            $companyAbout = CompanyAbout::findOrFail($id);
 
-        // Periksa apakah gambar diunggah
-        if ($request->hasFile('thumbnail')) {
-            // Unggah gambar baru
-            $image = $request->file('thumbnail');
-            $path = $image->storeAs('public/img', $image->hashName());
+            // Periksa apakah gambar diunggah
+            if ($request->hasFile('thumbnail')) {
+                // Unggah gambar baru
+                $image = $request->file('thumbnail');
+                $path = $image->storeAs('public/img', $image->hashName());
 
-            // Hapus gambar lama
-            if ($companyAboout->thumbnail) {
-                Storage::delete('/public'.$companyAbout->thumbnail);
+                // Hapus gambar lama
+                if ($companyAbout->thumbnail) {
+                    Storage::delete('/public/img/'.$companyAbout->thumbnail);
+                }
+
+                // Perbarui CompanyAbout dengan gambar baru
+                $companyAbout->update([
+                    'thumbnail' => $path,
+                    'name' => $request->name,
+                    'type' => $request->type,
+                ]);
+            } else {
+                // Perbarui CompanyAbout tanpa gambar
+                $companyAbout->update([
+                    'name' => $request->name,
+                    'type' => $request->type,
+                ]);
             }
 
-            // Perbarui HeroSection dengan gambar baru
-            $heroSection->update([
-                'thumbnail' => $path,
-                'name' => $request->heading,
-                'type' => $request->subheading,
+            // Update atau buat keypoints baru
+            if ($request->has('keypoints')) {
+                // Hapus keypoints lama
+                CompanyKeypoint::where('company_about_id', $id)->delete();
 
-            ]);
-        } else {
-            // Perbarui HeroSection tanpa gambar
-            $heroSection->update([
-                'name' => $request->heading,
-                'type' => $request->subheading,
-            ]);
+                // Buat keypoints baru
+                foreach ($request->keypoints as $keypoint) {
+                    CompanyKeypoint::create([
+                        'company_about_id' => $companyAbout->id,
+                        'keypoint' => $keypoint,
+                    ]);
+                }
+            }
+
+            // Redirect ke index
+            return redirect()->route('company-about.index')->with(['success' => 'Data Berhasil Diubah!']);
         }
-
-        // Redirect ke index
-        return redirect()->route('company-about.index')->with(['success' => 'Data Berhasil Diubah!']);
-    }
 
     public function destroy($id)
     {
-        $heroSection = HeroSection::findOrFail($id);
+        $heroSection = CompanyAbout::findOrFail($id);
         $heroSection->delete();
 
         return redirect()->route('company-about.index')->with('success', 'Company About Section deleted successfully.');
