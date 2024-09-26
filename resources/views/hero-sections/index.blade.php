@@ -10,8 +10,6 @@
             </a>
         </div>
     </x-slot>
-
-
     <div class="py-5">
         <div class="container">
             <div class="shadow-sm card">

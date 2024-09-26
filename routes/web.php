@@ -11,6 +11,7 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CompanyAboutController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ProjectClientController;
+use App\Http\Controllers\FrontEnd;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,7 +24,7 @@ use App\Http\Controllers\ProjectClientController;
 |
 */
 
-Route::get('/', [HeroSectionController::class, 'FrontEnd']);
+Route::get('/', [FrontEnd::class, 'index']);
 
 Route::get('/dashboard', function () {
     return view('dashboard');

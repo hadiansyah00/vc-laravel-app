@@ -33,15 +33,7 @@ class HeroSectionController extends Controller
         //render view with posts
         return view('hero-sections.index', compact('heroSections'));
     }
-    public function FrontEnd() //Halaman Frontend nya
-    {
-        //Tampilkan halaman view nya
-        $companyAbout = CompanyAbout::latest()->paginate(5);
-        $frontendHero = HeroSection::latest()->paginate(5);
-        $keypoints = CompanyKeypoint::all();
-        //render view with posts
-        return view('frontend-home', compact('frontendHero','companyAbout','keypoints'));
-    }
+
 
 
 
